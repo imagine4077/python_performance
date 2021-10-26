@@ -145,5 +145,30 @@
        user         0.06
        sys          0.06
 
-
+5. kernprof -l -v julia_lineprofiler.py
+> * 需要修改源代码，在需要测试的函数上加装饰器 @profile （无需import任何模块）
+> * 用于检查被测函数中每一条语句的执行时间
+       Wrote profile results to julia_lineprofiler.py.lprof
+       Timer unit: 1e-06 s
+       
+       Total time: 629.313 s
+       File: julia_lineprofiler.py
+       Function: calculate_z_serial_purepython at line 57
+       
+       Line #      Hits         Time  Per Hit   % Time  Line Contents
+       ==============================================================
+           57                                           @timefn
+           58                                           @profile
+           59                                           def calculate_z_serial_purepython(maxiter, zs, cs):
+           60                                               """Calculate output list using Julia update rule"""
+           61     10000      57741.0      5.8      0.0      output = [0] * len(zs)
+           62  50015000   23108122.0      0.5      3.7      for i in range(len(zs)):
+           63  50005000   22033007.0      0.4      3.5          n = 0
+           64  50005000   25636079.0      0.5      4.1          z = zs[i]
+           65  50005000   24792545.0      0.5      3.9          c = cs[i]
+           66 328353350  213632138.0      0.7     33.9          while abs(z) < 2 and n < maxiter:
+           67 278348350  154265234.0      0.6     24.5              z = z * z + c
+           68 278348350  140518954.0      0.5     22.3              n += 1
+           69  50005000   25262461.0      0.5      4.0          output[i] = n
+           70     10000       6633.0      0.7      0.0      return output
 
