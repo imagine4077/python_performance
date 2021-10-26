@@ -135,9 +135,14 @@
 
 
 3. python -m timeit -n 5 -r 5 -s "import julia" "julia.test_run(6)"
-> 原生timeit工具，运行单个函数
 
        5 loops, best of 5: 33.4 usec per loop
+> * 原生timeit工具，运行单个函数
+> * 也可以在Ipython内执行和使用，执行单个语句：
+>> 
+>>        In [1]: %timeit abs(-3) < 2
+>>        76 ns ± 0.896 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+
 
 4. /usr/bin/time -p python julia.py
 
@@ -145,9 +150,17 @@
        user         0.06
        sys          0.06
 
+> * real 记录了整体的耗时。
+> * user 记录了 CPU 花在任务上的时间，但不包括内核函数耗费的时间。 
+> * sys 记录了内核函数耗费的时间。
+> 
+> 对 user 和 sys 相加就得到了 CPU 总共花费的时间。而这个时间和 real 的差则 有可能是花费在等待 IO 上，也可能是你的系统正在忙着运行其他任务因此影响了你的测量。
+
 5. kernprof -l -v julia_lineprofiler.py
-> * 需要修改源代码，在需要测试的函数上加装饰器 @profile （无需import任何模块）
+> * 需要修改源代码，在需要测试的函数上加装饰器 @profile （无需import任何模块）,具体可见julia_lineprofiler.py
 > * 用于检查被测函数中每一条语句的执行时间
+> * % Time指当前语句耗时占总体耗时的比例
+
        Wrote profile results to julia_lineprofiler.py.lprof
        Timer unit: 1e-06 s
        
