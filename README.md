@@ -1,7 +1,10 @@
 # python_performance
 《python高性能编程》相关学习代码
 
+
 ---
+
+# CPU优化工具
 
 1. python -O -m cProfile -s cumulative julia.py
 > 原生cProfile工具，运行后根据各个函数累计耗时，将各函数排序。（-O 【欧】用于关闭assert）
@@ -184,4 +187,62 @@
            68 278348350  140518954.0      0.5     22.3              n += 1
            69  50005000   25262461.0      0.5      4.0          output[i] = n
            70     10000       6633.0      0.7      0.0      return output
+
+### 上述几种方法，涉及的分析文件
+
+* .stats (cProfile产生，可在ipython或python命令行中通过代码，调用pstats模块，解析之)
+* .lprof (kernprof产生)
+
+### 遗留问题
+1. runsnakerun的使用，遇到了问题，待解决，待试用
+2. .lprof 的使用，书中未说明
+
+---
+
+# 内存优化工具
+
+1. python -m memory_profiler julia_lineprofiler.py
+
+        Filename: julia_lineprofiler.py
+        
+        Line #    Mem usage    Increment  Occurences   Line Contents
+        ============================================================
+            57   38.281 MiB -251.266 MiB         225   @timefn
+            58                                         @profile
+            59                                         def calculate_z_serial_purepython(maxiter, zs, cs):
+            60                                             """Calculate output list using Julia update rule"""
+            61   38.281 MiB -289.527 MiB         225       output = [0] * len(zs)
+            62   38.281 MiB -56175.379 MiB       25650       for i in range(len(zs)):
+            63   38.281 MiB -55881.410 MiB       25425           n = 0
+            64   38.281 MiB -55881.410 MiB       25425           z = zs[i]
+            65   38.281 MiB -55881.410 MiB       25425           c = cs[i]
+            66   38.281 MiB -441406.484 MiB      169605           while abs(z) < 2 and n < maxiter:
+            67   38.281 MiB -385520.926 MiB      144180               z = z * z + c
+            68   38.281 MiB -385524.625 MiB      144180               n += 1
+            69   38.281 MiB -55885.844 MiB       25425           output[i] = n
+            70   38.281 MiB -293.969 MiB         225       return output
+        
+2. mmemory_profiler中的一个功能叫mprof，可以用于对内存使用情况进行采用和画图
+> * 具体怎么用，只说需要在代码里加入 `with profile.timestamp("create_xxx")`，添加标签。之后怎么出图没有说
+
+3. heapy可以调查堆上的对象(他是guppy项目中的一个工具)
+> * pip install guppy
+> * 需要修改代码：
+> 
+>         from guppy import phy
+>         hp = hpy()
+>         ...
+>         hp.setrelheap() # 可选项，用来创建一个内存断点，当后续调用hp.heap()时就会产生一个跟这个断电的差额。这样你就可以略过断点前由python内部操作导致的内存分配
+>         ...
+>         h = hp.heap()
+
+4. 用dowser实时画出变量的实例（对于大公司的OBP版本不实用，存在一些违规风险，存在对外暴露监听的问题）
+> * 对于自娱自乐的web服务器，可以用dowser和dozer，将对象行为实时可视化
+
+### 遗留问题
+1. memory_profiler中的mprof，要搞清楚用法，怎么出图
+
+
+
+
 
